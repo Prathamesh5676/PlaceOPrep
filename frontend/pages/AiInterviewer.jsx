@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import InterviewDashboard from '../components/ai-interviewer/InterviewDashboard';
+import VideoInterviewDashboard from '../components/ai-interviewer/VideoInterviewDashboard';
 import PerformanceReport from '../components/ai-interviewer/PerformanceReport';
 
 function AiInterviewer() {
@@ -13,6 +14,7 @@ function AiInterviewer() {
   const [showReport, setShowReport] = useState(false);
   const [questions, setQuestions] = useState([]);
   const [sessionId, setSessionId] = useState('');
+  const [conversationUrl, setConversationUrl] = useState('');
 
   const handleSubmit = async () => {
     setLoading(true);
@@ -47,14 +49,15 @@ function AiInterviewer() {
               company, 
               difficulty, 
               session_id: result.session_id,
-              num_questions
+              questions: result.questions
             })
           });
           
           const tavusData = await tavusResponse.json();
           
           if (tavusData.success && tavusData.conversation_url) {
-            window.location.href = tavusData.conversation_url;
+            setConversationUrl(tavusData.conversation_url);
+            setShowInterview(true);
             return;
           } else {
             alert('Failed to start video interview: ' + (tavusData.error || 'Unknown error'));
@@ -87,10 +90,15 @@ function AiInterviewer() {
     setFormat('voice');
     setQuestions([]);
     setSessionId('');
+    setConversationUrl('');
   };
 
   if (showReport) {
     return <PerformanceReport sessionId={sessionId} onStartNew={handleStartNewInterview} />;
+  }
+
+  if (showInterview && format === 'video' && conversationUrl) {
+    return <VideoInterviewDashboard conversationUrl={conversationUrl} sessionId={sessionId} onEndInterview={handleEndInterview} duration={parseInt(duration)} />;
   }
 
   if (showInterview) {

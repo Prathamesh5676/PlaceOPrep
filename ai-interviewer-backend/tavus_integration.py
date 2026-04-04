@@ -22,14 +22,33 @@ def start_tavus_conversation():
         company = data.get('company', 'Tech Company')
         difficulty = data.get('difficulty', 'Intermediate')
         session_id = data.get('session_id')
-        num_questions = data.get('num_questions', 5)
+        questions = data.get('questions', [])
+        num_questions = len(questions) if questions else data.get('num_questions', 5)
         
         print(f'📝 Role: {role}, Company: {company}, Questions: {num_questions}')
         print(f'🔑 API Key: {TAVUS_API_KEY[:10]}...' if TAVUS_API_KEY else '❌ No API Key')
         print(f'🎭 Replica ID: {TAVUS_REPLICA_ID}')
         print(f'👤 Persona ID: {TAVUS_PERSONA_ID}')
-        
-        custom_prompt = f"""You are an AI interviewer for a {role} position at {company}. Difficulty: {difficulty}.
+
+        if questions:
+            questions_text = '\n'.join(
+                f"{i+1}. {q['question']}" for i, q in enumerate(questions)
+            )
+            custom_prompt = f"""You are an AI interviewer conducting a {difficulty} level interview for a {role} position at {company}.
+
+You MUST ask ONLY these {num_questions} questions, in this exact order:
+{questions_text}
+
+Rules:
+1. Start with a brief welcome, then ask Question 1 immediately
+2. Ask ONE question at a time and wait for the candidate to finish answering
+3. After the candidate answers, acknowledge briefly and move to the next question
+4. Do NOT ask any questions outside this list
+5. After all {num_questions} questions are answered, thank the candidate and end the interview
+
+Begin now."""
+        else:
+            custom_prompt = f"""You are an AI interviewer for a {role} position at {company}. Difficulty: {difficulty}.
 
 Conduct the interview by asking exactly {num_questions} technical questions.
 
