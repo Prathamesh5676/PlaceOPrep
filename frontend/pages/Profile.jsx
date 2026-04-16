@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { User, Mail, Phone, Calendar, Award, Target, Clock, TrendingUp, Edit2, Save, X, Upload, Image as ImageIcon } from 'lucide-react';
+import { User, Mail, Phone, Calendar, Award, Target, Clock, TrendingUp, Edit2, Save, X, Upload, Image as ImageIcon, Bell, BellOff } from 'lucide-react';
 import api from '../services/api';
 
 export default function Profile() {
@@ -18,8 +18,19 @@ export default function Profile() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
 
+  // Notification settings state
+  const [notifSettings, setNotifSettings] = useState({
+    emailNotifications: false,
+    notificationEmail: '',
+    registeredEmail: ''
+  });
+  const [notifSaving, setNotifSaving] = useState(false);
+  const [notifSuccess, setNotifSuccess] = useState('');
+  const [notifError, setNotifError] = useState('');
+
   useEffect(() => {
     fetchUserProfile();
+    fetchNotifSettings();
   }, []);
 
   const fetchUserProfile = async () => {
@@ -44,6 +55,34 @@ export default function Profile() {
       setError('Failed to load profile data');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchNotifSettings = async () => {
+    try {
+      const res = await api.get('/notifications/settings');
+      setNotifSettings(res.data);
+    } catch (err) {
+      // silent — non-critical
+    }
+  };
+
+  const handleSaveNotifSettings = async () => {
+    setNotifSaving(true);
+    setNotifError('');
+    setNotifSuccess('');
+    try {
+      const res = await api.put('/notifications/settings', {
+        emailNotifications: notifSettings.emailNotifications,
+        notificationEmail: notifSettings.notificationEmail
+      });
+      setNotifSettings(res.data);
+      setNotifSuccess('Notification settings saved!');
+      setTimeout(() => setNotifSuccess(''), 3000);
+    } catch (err) {
+      setNotifError(err.response?.data?.message || 'Failed to save notification settings');
+    } finally {
+      setNotifSaving(false);
     }
   };
 
@@ -79,7 +118,10 @@ export default function Profile() {
       
       const formDataToSend = new FormData();
       formDataToSend.append('name', formData.name);
-      formDataToSend.append('gender', formData.gender);
+      // Only send gender when the user has actually selected one
+      if (formData.gender && formData.gender !== '') {
+        formDataToSend.append('gender', formData.gender);
+      }
       formDataToSend.append('mobileNumber', formData.mobileNumber);
       
       if (avatarFile) {
@@ -333,6 +375,82 @@ export default function Profile() {
                   </div>
                 )}
               </div>
+            </div>
+          </div>
+
+          {/* Notification Settings */}
+          <div className="bg-white rounded-2xl shadow-lg p-6">
+            <div className="flex items-center space-x-3 mb-6">
+              <div className="w-10 h-10 bg-purple-100 rounded-xl flex items-center justify-center">
+                <Bell className="w-5 h-5 text-purple-600" />
+              </div>
+              <div>
+                <h2 className="text-xl font-bold text-gray-900">Notification Settings</h2>
+                <p className="text-sm text-gray-500">Receive interview reminders and achievement alerts by email</p>
+              </div>
+            </div>
+
+            {notifError && (
+              <div className="bg-red-50 border border-red-200 rounded-xl p-3 mb-4 text-red-700 text-sm flex items-center space-x-2">
+                <span>⚠️</span><span>{notifError}</span>
+              </div>
+            )}
+            {notifSuccess && (
+              <div className="bg-green-50 border border-green-200 rounded-xl p-3 mb-4 text-green-700 text-sm flex items-center space-x-2">
+                <span>✅</span><span>{notifSuccess}</span>
+              </div>
+            )}
+
+            <div className="space-y-4">
+              {/* Toggle */}
+              <div className="flex items-center justify-between p-4 bg-gray-50 rounded-xl">
+                <div className="flex items-center space-x-3">
+                  {notifSettings.emailNotifications
+                    ? <Bell className="w-5 h-5 text-purple-600" />
+                    : <BellOff className="w-5 h-5 text-gray-400" />}
+                  <div>
+                    <p className="font-semibold text-gray-800 text-sm">Email Notifications</p>
+                    <p className="text-xs text-gray-500">Get notified for achievements, streaks &amp; reminders</p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => setNotifSettings(prev => ({ ...prev, emailNotifications: !prev.emailNotifications }))}
+                  className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none ${notifSettings.emailNotifications ? 'bg-purple-600' : 'bg-gray-300'}`}
+                >
+                  <span className={`inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform ${notifSettings.emailNotifications ? 'translate-x-6' : 'translate-x-1'}`} />
+                </button>
+              </div>
+
+              {/* Notification email input — visible only when enabled */}
+              {notifSettings.emailNotifications && (
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    Notification Email
+                    <span className="ml-2 text-xs font-normal text-gray-400">(leave blank to use your registered email)</span>
+                  </label>
+                  <input
+                    type="email"
+                    value={notifSettings.notificationEmail}
+                    onChange={e => setNotifSettings(prev => ({ ...prev, notificationEmail: e.target.value }))}
+                    className="w-full border-2 border-gray-200 rounded-xl p-3 focus:border-purple-500 focus:outline-none transition-colors text-sm"
+                    placeholder={notifSettings.registeredEmail || 'Enter email for notifications'}
+                  />
+                  {notifSettings.registeredEmail && (
+                    <p className="text-xs text-gray-400 mt-1">
+                      Registered email: <span className="text-gray-600">{notifSettings.registeredEmail}</span>
+                    </p>
+                  )}
+                </div>
+              )}
+
+              <button
+                onClick={handleSaveNotifSettings}
+                disabled={notifSaving}
+                className="w-full flex items-center justify-center space-x-2 px-4 py-2.5 bg-purple-600 text-white rounded-xl hover:bg-purple-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-semibold text-sm"
+              >
+                <Save className="w-4 h-4" />
+                <span>{notifSaving ? 'Saving...' : 'Save Notification Settings'}</span>
+              </button>
             </div>
           </div>
 

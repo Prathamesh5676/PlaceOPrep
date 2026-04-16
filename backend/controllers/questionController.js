@@ -6,9 +6,9 @@ const path = require('path');
 const loadAptitudeQuestionsFromJSON = () => {
   try {
     const files = [
-      { path: '../logical_reasoning.json', category: 'logical' },
-      { path: '../mathematical_aptitude.json', category: 'quantitative' },
-      { path: '../technical_questions.json', category: 'technical' }
+      { path: '../../logical_reasoning.json', category: 'logical' },
+      { path: '../../mathematical_aptitude.json', category: 'quantitative' },
+      { path: '../../technical_questions.json', category: 'technical' }
     ];
     
     let allQuestions = [];

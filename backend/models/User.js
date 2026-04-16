@@ -23,7 +23,7 @@ const userSchema = new mongoose.Schema({
   },
   gender: {
     type: String,
-    enum: ['Male', 'Female', 'Other', 'Prefer not to say'],
+    enum: ['Male', 'Female', 'Other', 'Prefer not to say', ''],
     default: ''
   },
   mobileNumber: {
@@ -50,7 +50,23 @@ const userSchema = new mongoose.Schema({
     type: Number,
     default: 0
   },
-  lastPracticeDate: Date
+  lastPracticeDate: Date,
+  role: {
+    type: String,
+    enum: ['user', 'admin'],
+    default: 'user'
+  },
+  resetPasswordToken: String,
+  resetPasswordExpires: Date,
+  refreshToken: String,
+  notificationEmail: {
+    type: String,
+    default: ''
+  },
+  emailNotifications: {
+    type: Boolean,
+    default: false
+  }
 }, {
   timestamps: true
 });

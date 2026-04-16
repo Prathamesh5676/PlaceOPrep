@@ -1,12 +1,18 @@
 const mongoose = require('mongoose');
 const dotenv = require('dotenv');
 const Question = require('./models/Question');
+const User = require('./models/User');
+const Skill = require('./models/Skill');
+const Achievement = require('./models/Achievement');
 
 dotenv.config();
 
 const questions = [
   // Technical Questions
   {
+    problem_id: 'two-sum-001',
+    frontend_id: '1',
+    problem_slug: 'two-sum',
     title: "Two Sum Problem",
     description: "Given an array of integers nums and an integer target, return indices of the two numbers such that they add up to target. You may assume that each input would have exactly one solution, and you may not use the same element twice.",
     category: "technical",
@@ -30,6 +36,9 @@ const questions = [
     points: 15
   },
   {
+    problem_id: 'reverse-linked-list-002',
+    frontend_id: '2',
+    problem_slug: 'reverse-linked-list',
     title: "Reverse Linked List",
     description: "Given the head of a singly linked list, reverse the list, and return the reversed list.",
     category: "technical",
@@ -46,6 +55,9 @@ const questions = [
     points: 15
   },
   {
+    problem_id: 'valid-parentheses-003',
+    frontend_id: '3',
+    problem_slug: 'valid-parentheses',
     title: "Valid Parentheses",
     description: "Given a string containing just the characters '(', ')', '{', '}', '[' and ']', determine if the input string is valid. An input string is valid if: Open brackets must be closed by the same type of brackets and in the correct order.",
     category: "technical",
@@ -61,6 +73,9 @@ const questions = [
     points: 10
   },
   {
+    problem_id: 'binary-search-004',
+    frontend_id: '4',
+    problem_slug: 'binary-search',
     title: "Binary Search Implementation",
     description: "Implement binary search algorithm to find the target value in a sorted array. Return the index if found, otherwise return -1.",
     category: "technical",
@@ -76,6 +91,9 @@ const questions = [
     points: 10
   },
   {
+    problem_id: 'merge-sorted-arrays-005',
+    frontend_id: '5',
+    problem_slug: 'merge-two-sorted-arrays',
     title: "Merge Two Sorted Arrays",
     description: "Given two sorted arrays, merge them into one sorted array efficiently.",
     category: "technical",
@@ -89,6 +107,9 @@ const questions = [
 
   // HR Questions
   {
+    problem_id: 'tell-me-about-yourself-006',
+    frontend_id: '6',
+    problem_slug: 'tell-me-about-yourself',
     title: "Tell me about yourself",
     description: "Introduce yourself professionally, covering your background, experience, and what makes you a good fit for this role.",
     category: "hr",
@@ -109,6 +130,9 @@ const questions = [
     points: 10
   },
   {
+    problem_id: 'why-work-here-007',
+    frontend_id: '7',
+    problem_slug: 'why-do-you-want-to-work-here',
     title: "Why do you want to work here?",
     description: "Explain your motivation for applying to this company and role.",
     category: "hr",
@@ -124,6 +148,9 @@ const questions = [
     points: 10
   },
   {
+    problem_id: 'challenging-situation-008',
+    frontend_id: '8',
+    problem_slug: 'describe-a-challenging-situation',
     title: "Describe a challenging situation at work",
     description: "Share a specific example of a difficult situation you faced and how you handled it.",
     category: "hr",
@@ -139,6 +166,9 @@ const questions = [
     points: 15
   },
   {
+    problem_id: 'five-year-plan-009',
+    frontend_id: '9',
+    problem_slug: 'where-do-you-see-yourself-in-5-years',
     title: "Where do you see yourself in 5 years?",
     description: "Discuss your career goals and aspirations for the future.",
     category: "hr",
@@ -148,6 +178,9 @@ const questions = [
     points: 10
   },
   {
+    problem_id: 'why-hire-you-010',
+    frontend_id: '10',
+    problem_slug: 'why-should-we-hire-you',
     title: "Why should we hire you?",
     description: "Convince the interviewer why you're the best candidate for this position.",
     category: "hr",
@@ -159,6 +192,9 @@ const questions = [
 
   // Aptitude Questions
   {
+    problem_id: 'number-series-011',
+    frontend_id: '11',
+    problem_slug: 'number-series',
     title: "Number Series",
     description: "Find the next number in the series: 2, 6, 12, 20, 30, ?",
     category: "aptitude",
@@ -171,6 +207,9 @@ const questions = [
     points: 10
   },
   {
+    problem_id: 'syllogism-012',
+    frontend_id: '12',
+    problem_slug: 'logical-reasoning-syllogism',
     title: "Logical Reasoning - Syllogism",
     description: "All managers are leaders. Some leaders are entrepreneurs. Conclusion: Some managers are entrepreneurs. Is this conclusion valid?",
     category: "aptitude",
@@ -183,6 +222,9 @@ const questions = [
     points: 10
   },
   {
+    problem_id: 'percentage-problem-013',
+    frontend_id: '13',
+    problem_slug: 'percentage-problem',
     title: "Percentage Problem",
     description: "If 40% of 60% of a number is 144, what is the number?",
     category: "aptitude",
@@ -195,6 +237,9 @@ const questions = [
     points: 10
   },
   {
+    problem_id: 'time-and-work-014',
+    frontend_id: '14',
+    problem_slug: 'time-and-work',
     title: "Time and Work",
     description: "A can complete a work in 12 days and B in 18 days. If they work together, how many days will it take?",
     category: "aptitude",
@@ -207,6 +252,9 @@ const questions = [
     points: 10
   },
   {
+    problem_id: 'probability-015',
+    frontend_id: '15',
+    problem_slug: 'probability',
     title: "Probability",
     description: "Two dice are thrown. What is the probability that the sum is greater than 9?",
     category: "aptitude",
@@ -221,6 +269,9 @@ const questions = [
 
   // General Interview Questions
   {
+    problem_id: 'walk-through-resume-016',
+    frontend_id: '16',
+    problem_slug: 'walk-me-through-your-resume',
     title: "Walk me through your resume",
     description: "Provide a chronological overview of your professional journey.",
     category: "general",
@@ -230,6 +281,9 @@ const questions = [
     points: 10
   },
   {
+    problem_id: 'salary-expectations-017',
+    frontend_id: '17',
+    problem_slug: 'salary-expectations',
     title: "What are your salary expectations?",
     description: "Discuss your compensation expectations for this role.",
     category: "general",
@@ -239,6 +293,9 @@ const questions = [
     points: 10
   },
   {
+    problem_id: 'questions-for-us-018',
+    frontend_id: '18',
+    problem_slug: 'do-you-have-any-questions',
     title: "Do you have any questions for us?",
     description: "Ask thoughtful questions about the role, team, or company.",
     category: "general",
@@ -249,17 +306,68 @@ const questions = [
   }
 ];
 
+// Demo users to create
+const demoUsers = [
+  {
+    email: 'demo@placeoprep.com',
+    password: 'demo1234',
+    name: 'Demo User',
+    avatar: 'https://ui-avatars.com/api/?name=Demo+User&background=7c3aed&color=fff'
+  },
+  {
+    email: 'admin@placeoprep.com',
+    password: 'admin1234',
+    name: 'Admin User',
+    avatar: 'https://ui-avatars.com/api/?name=Admin+User&background=dc2626&color=fff',
+    role: 'admin'
+  }
+];
+
+const achievementTypes = [
+  { type: 'first_steps', name: 'First Steps', description: 'Complete your first interview', target: 1, icon: '🎯' },
+  { type: 'getting_started', name: 'Getting Started', description: 'Complete 5 interviews', target: 5, icon: '🚀' },
+  { type: 'practice_perfect', name: 'Practice Makes Perfect', description: 'Complete 10 interviews', target: 10, icon: '💪' },
+  { type: 'consistency', name: 'Consistency', description: 'Practice 3 days in a row', target: 3, icon: '🔥' },
+  { type: 'week_warrior', name: 'Week Warrior', description: 'Practice 7 days in a row', target: 7, icon: '⚡' },
+  { type: 'high_performer', name: 'High Performer', description: 'Score 80% or higher', target: 1, icon: '⭐' },
+  { type: 'excellence', name: 'Excellence', description: 'Score 90% or higher', target: 1, icon: '🏆' },
+  { type: 'technical_master', name: 'Technical Master', description: 'Complete 5 technical rounds', target: 5, icon: '💻' },
+  { type: 'communication_expert', name: 'Communication Expert', description: 'Complete 5 HR rounds', target: 5, icon: '🗣️' },
+  { type: 'aptitude_ace', name: 'Aptitude Ace', description: 'Complete 5 aptitude rounds', target: 5, icon: '🧠' },
+  { type: 'simulation_champion', name: 'Simulation Champion', description: 'Complete a full simulation', target: 1, icon: '🎖️' },
+  { type: 'time_warrior', name: 'Time Warrior', description: 'Practice for 10 hours', target: 600, icon: '⏰' }
+];
+
+async function seedUsers() {
+  for (const userData of demoUsers) {
+    const existing = await User.findOne({ email: userData.email });
+    if (existing) {
+      console.log(`   ℹ️  User ${userData.email} already exists — skipping`);
+      continue;
+    }
+
+    const user = await User.create(userData);
+
+    // Initialize skills
+    await Skill.create({ userId: user._id });
+
+    // Initialize achievements
+    await Achievement.insertMany(achievementTypes.map(a => ({ ...a, userId: user._id })));
+
+    console.log(`   ✅ Created user: ${userData.email} / password: ${userData.password}${userData.role === 'admin' ? ' (ADMIN)' : ''}`);
+  }
+}
+
 async function seedDatabase() {
   try {
     const MONGO_URI = process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/placeoprep';
     await mongoose.connect(MONGO_URI);
     console.log('✅ Connected to MongoDB');
 
-    // Clear existing questions
+    // --- Seed Questions ---
     await Question.deleteMany({});
     console.log('🗑️  Cleared existing questions');
 
-    // Insert new questions
     await Question.insertMany(questions);
     console.log(`✅ Inserted ${questions.length} questions`);
 
@@ -268,11 +376,21 @@ async function seedDatabase() {
     const hr = questions.filter(q => q.category === 'hr').length;
     const aptitude = questions.filter(q => q.category === 'aptitude').length;
     const general = questions.filter(q => q.category === 'general').length;
-
     console.log(`   Technical: ${technical}`);
     console.log(`   HR: ${hr}`);
     console.log(`   Aptitude: ${aptitude}`);
     console.log(`   General: ${general}`);
+
+    // --- Seed Demo Users ---
+    console.log('\n👤 Seeding demo users...');
+    await seedUsers();
+
+    console.log('\n🔑 Login credentials:');
+    console.log('   Email:    demo@placeoprep.com');
+    console.log('   Password: demo1234');
+    console.log('');
+    console.log('   Email:    admin@placeoprep.com');
+    console.log('   Password: admin1234');
 
     console.log('\n✅ Database seeded successfully!');
     process.exit(0);

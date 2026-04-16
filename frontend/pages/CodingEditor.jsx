@@ -31,11 +31,34 @@ export default function CodingEditor() {
         totalQuestions: navState.totalQuestions || 0,
         filteredQuestions: navState.filteredQuestions || []
       });
-      localStorage.setItem('codingContext', JSON.stringify(navState));
+      // Only persist lightweight context — never store full question objects
+      try {
+        const lightContext = {
+          difficulty: navState.difficulty || 'all',
+          category: navState.category || 'all',
+          questionIndex: navState.questionIndex || 0,
+          totalQuestions: navState.totalQuestions || 0,
+          fromDailyChallenge: navState.fromDailyChallenge || false,
+          fromCompanyPrep: navState.fromCompanyPrep || false,
+          company: navState.company || null,
+          // Only keep _id + title so navigation still works without bloating storage
+          filteredQuestions: (navState.filteredQuestions || []).map(q => ({
+            _id: q._id,
+            title: q.title || ''
+          }))
+        };
+        localStorage.setItem('codingContext', JSON.stringify(lightContext));
+      } catch (e) {
+        // localStorage full — non-critical, skip persisting
+      }
     } else {
       const savedContext = localStorage.getItem('codingContext');
       if (savedContext) {
-        setContext(JSON.parse(savedContext));
+        try {
+          setContext(JSON.parse(savedContext));
+        } catch (e) {
+          localStorage.removeItem('codingContext');
+        }
       }
     }
     fetchQuestion();
@@ -108,6 +131,14 @@ export default function CodingEditor() {
   };
 
   const handleBackToProblems = () => {
+    if (location.state?.fromDailyChallenge) {
+      navigate('/daily-challenge');
+      return;
+    }
+    if (location.state?.fromCompanyPrep) {
+      navigate('/company-prep');
+      return;
+    }
     navigate('/coding-problems', {
       state: {
         difficulty: context.difficulty,
@@ -127,11 +158,19 @@ export default function CodingEditor() {
 
   const fetchQuestion = async () => {
     try {
+      // Guard: if stored codingContext is oversized (leftover from old sessions), clear it
+      try {
+        const stored = localStorage.getItem('codingContext');
+        if (stored && stored.length > 200000) { // > ~200KB is too large
+          localStorage.removeItem('codingContext');
+        }
+      } catch (e) { /* ignore */ }
+
       // Load question from JSON file (like CodingProblems.jsx)
       const response = await fetch('/merged_problems.json');
       const data = await response.json();
-      const foundQuestion = data.questions.find((q, index) => q.id === id || `question-${index}` === id);
-      
+      const foundQuestion = data.questions.find((q, index) => String(q.id) === id || `question-${index}` === id);
+
       if (foundQuestion) {
         // Transform question to match expected format
         const transformedQuestion = {
@@ -151,18 +190,18 @@ export default function CodingEditor() {
                 explanation: ex.explanation || `Input: ${ex.input}, Output: ${ex.output}`
               };
             }
-            
+
             // Handle old format for backward compatibility
             const exampleText = ex.example_text || '';
             let input = '';
             let expectedOutput = '';
-            
+
             if (exampleText.includes('Input:') && exampleText.includes('Output:')) {
               input = exampleText.split('Input:')[1]?.split('Output:')[0]?.trim() || '';
               const outputPart = exampleText.split('Output:')[1]?.trim() || '';
               expectedOutput = outputPart.split('Explanation:')[0]?.trim() || outputPart;
             }
-            
+
             return {
               input,
               expectedOutput,
@@ -171,7 +210,7 @@ export default function CodingEditor() {
           }) || [],
           boilerplateCode: foundQuestion.code_snippets || {}
         };
-        
+
         setQuestion(transformedQuestion);
       } else {
         console.error('Question not found in JSON');

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import api from '../services/api';
 
 export default function Login() {
@@ -30,10 +30,13 @@ export default function Login() {
       
       const response = await api.post(endpoint, data);
       
-      // Store token and user
+      // Store token, refreshToken, and user
       localStorage.setItem('token', response.data.token);
+      if (response.data.refreshToken) {
+        localStorage.setItem('refreshToken', response.data.refreshToken);
+      }
       localStorage.setItem('user', JSON.stringify(response.data.user));
-      
+
       // Force reload to update App state
       window.location.href = '/dashboard';
     } catch (err) {

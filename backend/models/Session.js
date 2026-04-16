@@ -43,6 +43,15 @@ const sessionSchema = new mongoose.Schema({
     type: Boolean,
     default: false
   },
+  status: {
+    type: String,
+    enum: ['in_progress', 'completed', 'abandoned'],
+    default: 'in_progress'
+  },
+  metadata: {
+    type: mongoose.Schema.Types.Mixed,
+    default: {}
+  },
   startTime: Date,
   endTime: Date
 }, {
